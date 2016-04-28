@@ -168,8 +168,7 @@ public class GUI extends JFrame implements MouseListener {
 		button_panel.add(button_c, new FlowLayout());
 		button_panel.add(button_k, new FlowLayout());
 		button_panel.add(button_i, new FlowLayout());
-		//button_panel.add(button_d, new FlowLayout());
-		int[][] tab1 = new int[20][20];
+	
 		arr = new DrawArray(tab1);
 
 		button_d.addActionListener(new ActionListener() {
@@ -196,6 +195,7 @@ public class GUI extends JFrame implements MouseListener {
 			public void actionPerformed(ActionEvent e) {
 
 				simulate();
+				arr.repaint();
 
 			}
 		});
