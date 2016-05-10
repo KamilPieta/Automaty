@@ -1,6 +1,12 @@
 
 
 import java.awt.BorderLayout;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,8 +26,10 @@ public class Main extends JFrame{
 	
  new GUI();
 	
-	 
-
+		int[][] arr = new int[5][10];
+		
+		System.out.println("dlugosc wiersza to "+arr[0].length);
+		System.out.println("dlugosc kolumnyto to "+arr.length);
 	}
 
 }

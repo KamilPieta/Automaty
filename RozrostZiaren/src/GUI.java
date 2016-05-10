@@ -1,5 +1,4 @@
 
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -7,219 +6,312 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class GUI extends JFrame implements MouseListener {
 
-	Boolean immigration = false;
-	Boolean periodic = false;
+	Boolean periodic = true;
 	DrawArray arr;
-	
-	static int licznik =0;
-	int[][] tab1 = new int[301][301];
-	
+	int[][] tab = new int[387][300];
+	static int licznik = 0;
 
-	private int sprawdzSasiadow(int[][] arr) {
+	protected int chooseSimultaion = -1;
 
-		int liczba_sasiadow = 0;
-		liczba_sasiadow = (arr[1][1] == 1 || arr[1][1] == 2) ? -1 : 0;
+	private void algorytm(int choose) {
 
-		for (int i = 0; i < 3; ++i) {
-			for (int j = 0; j < 3; j++) {
-				if (arr[i][j] == 1) {
-					liczba_sasiadow++;
-					
+		int[][] tab1 = new int[387][300];
+		for (int i = 0; i < arr.arr.length; i++) {
+			for (int j = 0; j < arr.arr[0].length; ++j) {
+				int[][] array = new int[3][3];
+				int BCip = i - 1, BCjp = j - 1, BCik = i + 1, BCjk = j + 1;
+				if (periodic) {
+					if (i == 0)
+						BCip = arr.arr.length - 1;
+					if (j == 0)
+						BCjp = arr.arr[0].length - 1;
+					if (i == arr.arr.length - 1)
+						BCik = 0;
+					if (j == arr.arr[0].length - 1)
+						BCjk = 0;
+
+				} else if (!periodic) {
+					if (i == 0) {
+						arr.arr[BCip][BCjp] = 0;
+						arr.arr[BCip][j] = 0;
+						arr.arr[BCip][BCjk] = 0;
+					}
+					if (j == 0) {
+						arr.arr[BCip][BCjp] = 0;
+						arr.arr[i][BCjp] = 0;
+						arr.arr[BCik][BCjp] = 0;
+					}
+					if (i == arr.arr.length - 1) {
+						arr.arr[BCik][BCjk] = 0;
+						arr.arr[BCik][j] = 0;
+						arr.arr[BCik][BCjp] = 0;
+					}
+					if (j == arr.arr[0].length - 1) {
+						arr.arr[BCip][BCjk] = 0;
+						arr.arr[BCik][BCjk] = 0;
+						arr.arr[i][BCjk] = 0;
+					}
 				}
-				if (arr[i][j] == 2) {
-					liczba_sasiadow++;
-				
+				array[1][1] = arr.arr[i][j];
+				array[0][0] = arr.arr[BCip][BCjp];
+				array[2][2] = arr.arr[BCik][BCjk];
+				array[0][1] = arr.arr[BCip][j];
+				array[1][0] = arr.arr[i][BCjp];
+				array[1][2] = arr.arr[i][BCjk];
+				array[2][1] = arr.arr[BCik][j];
+				array[2][0] = arr.arr[BCik][BCjp];
+				array[0][2] = arr.arr[BCip][BCjk];
+
+				if (array[1][1] == 0) {
+					int[] neight = new int[8];
+					switch (choose) {
+					case 1: { // hexagonalne prawostronna
+						neight[0] = array[0][1];
+						neight[1] = array[0][2];
+						neight[2] = array[1][0];
+						neight[3] = array[2][0];
+						neight[4] = array[2][1];
+						neight[5] = array[1][2];
+					}
+						break;
+					case 2: { // VonNeumana
+						neight[0] = array[0][1];
+						neight[1] = array[1][0];
+						neight[2] = array[1][2];
+						neight[3] = array[2][1];
+					}
+						break;
+					case 3: { // Moora
+						neight[0] = array[0][0];
+						neight[1] = array[0][1];
+						neight[2] = array[0][2];
+						neight[3] = array[1][0];
+						neight[4] = array[1][2];
+						neight[5] = array[2][0];
+						neight[6] = array[2][2];
+						neight[7] = array[2][1];
+
+					}
+						break;
+
+					case 4: {// pentagonalne dol
+						neight[0] = array[1][0];
+						neight[1] = array[1][2];
+						neight[2] = array[2][2];
+						neight[3] = array[2][0];
+						neight[4] = array[2][1];
+					}
+						break;
+
+					case 5: {// pentagonalne lewa
+						neight[0] = array[0][0];
+						neight[1] = array[0][1];
+						neight[2] = array[1][0];
+						neight[3] = array[2][0];
+						neight[4] = array[2][1];
+					}
+						break;
+					case 6: {// pentagonalne prawa
+
+						neight[0] = array[0][1];
+						neight[1] = array[0][2];
+						neight[2] = array[1][2];
+						neight[3] = array[2][1];
+						neight[4] = array[2][2];
+					}
+						break;
+					case 7: {// pentagonalne gora
+						neight[0] = array[0][1];
+						neight[1] = array[0][2];
+						neight[2] = array[0][0];
+						neight[3] = array[1][0];
+						neight[4] = array[1][2];
+					}
+						break;
+					case 8: { // hexagonalne lewostronna
+						neight[0] = array[0][0];
+						neight[1] = array[0][1];
+						neight[2] = array[1][0];
+						neight[3] = array[1][2];
+						neight[4] = array[2][1];
+						neight[5] = array[2][2];
+					}
+						break;
+					}
+					Map<Integer, Integer> powtorki = new HashMap<Integer, Integer>();
+					Integer powtorzono = 0;
+					Boolean dodano = false;
+
+					for (int n = 0; n < neight.length; ++n) {
+						if (neight[n] != 0) {
+							for (Integer key : powtorki.keySet())
+								if (key == neight[n]) {
+									powtorki.put(key, ++powtorzono);
+									dodano = true;
+								}
+
+							if (dodano == false) {
+								dodano = false;
+								powtorzono = 1;
+								powtorki.put(neight[n], powtorzono);
+							}
+
+							Map.Entry<Integer, Integer> maxEntry = null;
+							int maxValueInMap = (Collections.max(powtorki.values()));
+							for (Entry<Integer, Integer> entry : powtorki.entrySet()) {
+								if (entry.getValue() == maxValueInMap) {
+									tab1[i][j] = entry.getKey();
+								}
+							}
+						}
+					}
+					arr.arr[i][j] = array[1][1];
+					arr.arr[BCip][BCjp] = array[0][0];
+					arr.arr[BCik][BCjk] = array[2][2];
+					arr.arr[BCip][j] = array[0][1];
+					arr.arr[i][BCjp] = array[1][0];
+					arr.arr[i][BCjk] = array[1][2];
+					arr.arr[BCik][j] = array[2][1];
+					arr.arr[BCik][BCjp] = array[2][0];
+					arr.arr[BCip][BCjk] = array[0][2];
 				}
 			}
 		}
-
-		return liczba_sasiadow;
-
-	}
-
-	private void algorytm(){
-		
-		
-		
-		int[][] array= new int[3][3];
-		
-
-		for(int i=0;i<arr.arr.length;i++){
-		for(int j=0; j<arr.arr.length;++j)
-		{	
-		
-			int BCip=i-1, BCjp=j-1,BCik=i+1,BCjk=j+1;
-			if(periodic){
-			if(i==0)
-			BCip=arr.arr.length-1;
-			if(j==0)
-			BCjp=arr.arr.length-1;
-			if(i==arr.arr.length-1)
-			BCik=0;
-			if(j==arr.arr.length-1)
-			BCjk=0;
-			}
-			else{
-				if(i==0)
-					BCip=300;
-					if(j==0)
-					BCjp=300;
-					if(i==arr.arr.length-1)
-					BCik=300;
-					if(j==arr.arr.length-1)
-					BCjk=300;
-				
-			}
-			
-				array[1][1]= arr.arr[i][j];
-				array[0][0]=arr.arr[BCip][BCjp];
-				array[2][2]=arr.arr[BCik][BCjk];		
-				array[0][1]=arr.arr[BCip][j];
-				array[1][0]=arr.arr[i][BCjp];
-				array[1][2]=arr.arr[i][BCjk];
-				array[2][1]=arr.arr[BCik][j];
-				array[2][0]=arr.arr[BCik][BCjp];
-				array[0][2]=arr.arr[BCip][BCjk];
-		
-				
-					
-			
-		}
-		
-	}
-		for(int i=0;i<arr.arr.length;i++){
-			for(int j=0; j<arr.arr.length;++j)
-			{	arr.arr[i][j]=tab1[i][j];
-			tab1[i][j]=0;
-			
-				
-			}}
+		for (int i = 0; i < arr.arr.length; ++i)
+			for (int j = 0; j < arr.arr[0].length; ++j)
+				arr.arr[i][j] += tab1[i][j];
 		arr.repaint();
-		
-		
-		
 	}
 
-	private void simulate() {
+	private void simulate(int choose) {
 		Thread t1 = new Thread() {
 
 			public void run() {
 				try {
-					for (int i = 0; i < 51; ++i) {
+					for (int i = 0; i < 100; ++i) {
 						Thread.sleep(50);
-						algorytm();
+						algorytm(choose);
 					}
-
 				} catch (Exception e) {
 				}
 			}
-
 		};
 		t1.start();
-
 	}
-	private void clean(){
+
+	private void clean() {
 		for (int i = 0; i < arr.arr.length; i++) {
-			for (int j = 0; j < arr.arr.length; ++j)
+			for (int j = 0; j < arr.arr[0].length; ++j)
 				arr.arr[i][j] = 0;
 		}
-		licznik=0;
+		licznik = 0;
 		arr.koloryMapa.clear();
-	
 	}
 
 	public GUI() {
-
-		JButton button_o = new JButton("Rozne kolory");
-		JButton button_n = new JButton("niezmienne");
-		JButton button_pn = new JButton("periodyczne On/Off");
-		JButton button_c = new JButton("Czysc");
+		arr = new DrawArray(tab);
 		JButton button_k = new JButton("symulacja >>");
 		JButton button_w = new JButton("Wybierz");
-		JButton button_d = new JButton("Darwinia on/off");
-		
-	    String[] selections = { "losowe", "rownomierne", "z promieniem" ,"periodyczne On/Off","Rozne kolory","Czysc"};
-	    JComboBox lista = new JComboBox(selections);
-	    lista.setSelectedIndex(1);
-		
-		
+		JButton button_p = new JButton("Rysuj z promieniem");
+		String[] selections = { "losowe", "rownomierne", "heksagonalna prawo", "periodyczne On/Off",
+				"heksagonalna lewostr", "Von Neumana", "Moore'a", "pentagonalnie(losowo)", "heksogonalna (losowo)",
+				"Czysc" };
+		JComboBox lista = new JComboBox(selections);
+		lista.setSelectedIndex(1);
+		JSlider slider = new JSlider();
+		JLabel sliderVal = new JLabel();
+		JPanel slider_panel = new JPanel(new BorderLayout());
 		JPanel main_panel = new JPanel();
 		JPanel button_panel = new JPanel();
-		//button_panel.add(button_o, new FlowLayout());
-		//button_panel.add(button_n, new FlowLayout());
-	//	button_panel.add(button_pn, new FlowLayout());
-		//button_panel.add(button_c, new FlowLayout());
-		
+
+		slider_panel.add(slider, BorderLayout.NORTH);
+		slider_panel.add(sliderVal, BorderLayout.CENTER);
 		button_panel.add(lista, new FlowLayout());
 		button_panel.add(button_w, new FlowLayout());
 		button_panel.add(button_k, new FlowLayout());
-		arr = new DrawArray(tab1);
-
-		button_d.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-			
-
-			}
-		});
+		button_panel.add(slider_panel);
+		button_panel.add(button_p, new FlowLayout());
 
 		button_w.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//  String[] selections = { "losowe", "rownomierne", "z promieniem" ,"periodyczne On/Off","Rozne kolory","Czysc"};
+
 				int choose = lista.getSelectedIndex();
-				System.out.println(choose);
-			
-				
-				switch (choose){
-					
-				case 0:
-				{
+
+				switch (choose) {
+
+				case 0: {
 					Random rand = new Random();
-				for(int i=0;i<20;++i)
-					arr.arr[rand.nextInt(300)][rand.nextInt(300)]=++licznik;
-				
-				}break;
-				
-				case 1:
-				{
-				int period=	arr.arr.length/10;
-				System.out.println(period+" ::");
-				for(int i=0;i<arr.arr.length/20;++i){
-					for(int j=0;j<arr.arr.length/30;++j)
-						arr.arr[(period*i)%arr.arr.length][(period*j)%arr.arr.length]=++licznik;
-				}}break;
-				
+					for (int i = 0; i < 20; ++i)
+						arr.arr[rand.nextInt(387)][rand.nextInt(300)] = ++licznik;
+				}
+					break;
+
+				case 1: {
+					int period = arr.arr.length / 10;
+					for (int i = 0; i < arr.arr.length / 20; ++i) {
+						for (int j = 0; j < arr.arr[0].length / 30; ++j)
+							arr.arr[(period * i) % arr.arr.length][(period * j) % arr.arr[0].length] = ++licznik;
+					}
+				}
+					break;
+
 				case 2:
-				{
-					int promien = 30;
-				}break;
-				
+					chooseSimultaion = 1;
+					break;
+
 				case 3:
-				{
-					periodic=!periodic;
-				}break;
-				
+					periodic = periodic;
+					break;
+
+				case 4:
+					chooseSimultaion = 8;
+					break;
 				case 5:
+					chooseSimultaion = 2;
+					break;
+				case 6:
+					chooseSimultaion = 3;
+					break;
+				case 7: {
+					Random losuj = new Random();
+					chooseSimultaion = losuj.nextInt(4) + 4;
+				}
+					break;
+				case 8: {
+					Random los = new Random();
+					if (los.nextInt(2) == 0)
+						chooseSimultaion = 1;
+					else
+						chooseSimultaion = 8;
+				}
+					break;
+
+				case 9:
 					clean();
 					break;
 				}
-				
 				arr.repaint();
-
 			}
 		});
 
@@ -228,62 +320,45 @@ public class GUI extends JFrame implements MouseListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				simulate();
+				simulate(chooseSimultaion);
 
 			}
 		});
 
-		button_o.addActionListener(new ActionListener() {
+		slider.addChangeListener(new ChangeListener() {
 
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				Random rand = new Random();
+			public void stateChanged(ChangeEvent e) {
+				sliderVal.setText("promien rowny : " + String.valueOf(slider.getValue()));
 
-				for (int i = 0; i < arr.arr.length; i++) {
-					for (int j = 0; j < arr.arr.length; j++)
-					{	
-				
-				int x = rand.nextInt(256);
-				
-				arr.arr[i][j] =x;
-				
-					}
-					arr.repaint();
-			}}
-		});
-
-		button_n.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-		
-			arr.arr[0][0]=1;
-			arr.arr[1][1]=2;
-			arr.arr[2][2]=7;
-			arr.arr[3][3]=4;
-			arr.arr[4][4]=1;
-			arr.repaint();
 			}
 		});
 
-		button_pn.addActionListener(new ActionListener() {
+		button_p.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
-				periodic=!periodic;
+				int promien = slider.getValue();
+				int iteracje = 100;
+				while (iteracje != 0) {
+					Random losuj_miejsce = new Random();
+					int miejsceY = losuj_miejsce.nextInt(300);
+					int miejsceX = losuj_miejsce.nextInt(300);
+
+					iteracje--;
+				}
+
 			}
 		});
 
-		arr.setSize(600,600);
+		// arr.setSize(760,600);
 		arr.repaint();
 
 		main_panel.add(button_panel);
 		addMouseListener(this);
-		add(main_panel, BorderLayout.NORTH);
+		add(main_panel, BorderLayout.PAGE_START);
 		add(arr, BorderLayout.CENTER);
-		setSize(680, 650);
+		setSize(780, 676);
 		setTitle("Rozrost");
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -296,16 +371,14 @@ public class GUI extends JFrame implements MouseListener {
 	public void mouseClicked(MouseEvent e) {
 
 		int xCord, yCord;
-			System.out.println("x :: "+ e.getX()+ "  y ::: "+e.getY());
-		if (e.getX() >= 0 && e.getX() <= 600 && e.getY() >= 50
-				&& e.getY() <= 650) {
-			xCord = e.getX() / 2;
-			yCord = (e.getY() - 50) / 2;
+		System.out.println("x :: " + e.getX() + "  y :: " + e.getY());
+		if (e.getX() >= 0 && e.getX() <= 600 && e.getY() >= 50 && e.getY() <= 650) {
+			xCord = (e.getX() - 5) / 2;
+			yCord = (e.getY() - 75) / 2;
 			licznik++;
 			arr.arr[xCord][yCord] = licznik;
 			arr.repaint();
 		}
-	
 
 	}
 
