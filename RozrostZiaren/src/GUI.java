@@ -49,28 +49,7 @@ public class GUI extends JFrame implements MouseListener {
 					if (j == arr.arr[0].length - 1)
 						BCjk = 0;
 
-				} else if (!periodic) {
-					if (i == 0) {
-						arr.arr[BCip][BCjp] = 0;
-						arr.arr[BCip][j] = 0;
-						arr.arr[BCip][BCjk] = 0;
-					}
-					if (j == 0) {
-						arr.arr[BCip][BCjp] = 0;
-						arr.arr[i][BCjp] = 0;
-						arr.arr[BCik][BCjp] = 0;
-					}
-					if (i == arr.arr.length - 1) {
-						arr.arr[BCik][BCjk] = 0;
-						arr.arr[BCik][j] = 0;
-						arr.arr[BCik][BCjp] = 0;
-					}
-					if (j == arr.arr[0].length - 1) {
-						arr.arr[BCip][BCjk] = 0;
-						arr.arr[BCik][BCjk] = 0;
-						arr.arr[i][BCjk] = 0;
-					}
-				}
+				} 
 				array[1][1] = arr.arr[i][j];
 				array[0][0] = arr.arr[BCip][BCjp];
 				array[2][2] = arr.arr[BCik][BCjk];
@@ -242,7 +221,7 @@ public class GUI extends JFrame implements MouseListener {
 		JPanel slider_panel = new JPanel(new BorderLayout());
 		JPanel main_panel = new JPanel();
 		JPanel button_panel = new JPanel();
-
+		slider.setMaximum(150);
 		slider_panel.add(slider, BorderLayout.NORTH);
 		slider_panel.add(sliderVal, BorderLayout.CENTER);
 		button_panel.add(lista, new FlowLayout());
@@ -268,10 +247,12 @@ public class GUI extends JFrame implements MouseListener {
 					break;
 
 				case 1: {
-					int period = arr.arr.length / 10;
-					for (int i = 0; i < arr.arr.length / 20; ++i) {
+					int period1 = arr.arr[0].length / 10;
+					int period2 = arr.arr.length / 10;
+					for (int i = 0; i < arr.arr.length / 30; ++i) {
 						for (int j = 0; j < arr.arr[0].length / 30; ++j)
-							arr.arr[(period * i) % arr.arr.length][(period * j) % arr.arr[0].length] = ++licznik;
+							if(period2*i<arr.arr.length && period1*j<arr.arr[0].length)
+							arr.arr[(period2 * i) ][(period1 * j)] = ++licznik;
 					}
 				}
 					break;
@@ -281,7 +262,7 @@ public class GUI extends JFrame implements MouseListener {
 					break;
 
 				case 3:
-					periodic = periodic;
+					periodic =periodic;
 					break;
 
 				case 4:
@@ -338,16 +319,38 @@ public class GUI extends JFrame implements MouseListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int promien = slider.getValue();
-				int iteracje = 100;
-				while (iteracje != 0) {
-					Random losuj_miejsce = new Random();
-					int miejsceY = losuj_miejsce.nextInt(300);
-					int miejsceX = losuj_miejsce.nextInt(300);
-
-					iteracje--;
+				
+				int minDist = (int) (((slider.getValue() * Math.sqrt(2)) / 2) + 1);
+				Random pointX = new Random();
+				Random pointY = new Random();
+				int giveAShot = 100;
+				int pX;
+				int pY;
+				boolean isAvalible = true;
+				
+				while (giveAShot != 0) {
+					do {
+						pX = pointX.nextInt(arr.arr.length);
+						pY = pointY.nextInt(arr.arr[0].length);
+					} while ((pX - minDist) < 0 || (pY - minDist) < 0 || (pX + minDist) > arr.arr.length
+							|| (pY + minDist) > arr.arr[0].length);
+				
+					
+						for (int i = (pX - minDist); i < (pX + minDist); ++i)
+								for (int j = (pY - minDist); j < (pY + minDist); ++j)
+								{	if (arr.arr[i][j] != 0)
+								{isAvalible = false;break;}}
+					
+					if (isAvalible)
+					{	arr.arr[pX][pY] = ++licznik;
+							}	
+					
+					isAvalible = true;
+					giveAShot--;
 				}
-
+				
+				arr.repaint();
+				
 			}
 		});
 
@@ -375,6 +378,8 @@ public class GUI extends JFrame implements MouseListener {
 		if (e.getX() >= 0 && e.getX() <= 600 && e.getY() >= 50 && e.getY() <= 650) {
 			xCord = (e.getX() - 5) / 2;
 			yCord = (e.getY() - 75) / 2;
+			
+			System.out.println("xCord= "+xCord +" yCord= "+yCord);
 			licznik++;
 			arr.arr[xCord][yCord] = licznik;
 			arr.repaint();
